@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Upload</title>
 </head>
 <body>
+    <h1>Resume Parser</h1>
     <form action="{% url 'fileapp:uploads' %}" method="post" enctype="multipart/form-data">
 
-        <input type="file" multiple name="UploadFiles">
+        <p><input type="file" multiple name="UploadFiles"></p>
         {% csrf_token %}
-        <button type="submit">Upload</button>
+        <p><button type="submit">Upload</button></p>
 
     </form>
     
