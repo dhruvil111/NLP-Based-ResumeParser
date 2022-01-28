@@ -22,16 +22,16 @@ def send_files(request):
             resume.email              = data.get('email')
             resume.mobile_number      = data.get('mobile_number')
             resume.company_name      = data.get('company_names')
-            resume.college_name       = data.get('college_name')
+            #resume.college_name       = data.get('college_name')
             l = []
-            if data.get('designation'):
+            '''if data.get('designation'):
                 for i in data.get('designation'):
                     if '@' in i:
                         continue
                     else:
-                        l.append(i)
+                        l.append(i)'''
 
-            resume.designation        = l
+            resume.designation        = data.get('designation')
             resume.total_experience   = data.get('total_experience')  
 
             if data.get('skills') is not None:
@@ -39,13 +39,13 @@ def send_files(request):
             else:
                 resume.skills         = None 
             
-            if data.get('degree') is not None:
-                resume.education      = ', '.join(data.get('degree'))
+            if data.get('education') is not None:
+                resume.education      = data.get('education') #, '.join(data.get('education'))
             else:
                 resume.education      = None
             
             if data.get('experience') is not None:
-                resume.experience     = ', '.join(data.get('experience'))
+                resume.experience     = data.get('experience')
             else:
                 resume.experience     = None
             

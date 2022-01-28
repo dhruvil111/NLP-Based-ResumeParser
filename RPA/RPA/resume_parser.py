@@ -8,6 +8,7 @@ import multiprocessing as mp
 class ResumeParser(object):
     def __init__(self, resume):
         nlp = spacy.load('en_core_web_sm')
+        #custom_nlp = spacy.load('RPA\custom_nlp_model')
         self.__matcher = Matcher(nlp.vocab)
         self.__details = {
             'name'              : None,
@@ -16,7 +17,7 @@ class ResumeParser(object):
             'skills'            : None,
             'education'         : None,
             'experience'        : None,
-            'competencies'      : None,
+            #'college_name'      : None,
             'measurable_results': None
         }
         self.__resume      = resume
@@ -30,26 +31,43 @@ class ResumeParser(object):
         return self.__details
 
     def __get_basic_details(self):
+        entities = utils.extract_entity_sections_grad(self.__text_raw)
         name       = utils.extract_name(self.__nlp, matcher=self.__matcher)
         email      = utils.extract_email(self.__text)
         mobile     = utils.extract_mobile_number(self.__text)
         skills     = utils.extract_skills(self.__nlp, self.__noun_chunks)
         edu        = utils.extract_education([sent.string.strip() for sent in self.__nlp.sents])
-        experience = utils.extract_experience(self.__text)
+        if 'experience' in entities:
+            experience = entities['experience']
+        else:
+            experience = None
         entities   = utils.extract_entity_sections(self.__text_raw)
         self.__details['name'] = name
         self.__details['email'] = email
         self.__details['mobile_number'] = mobile
         self.__details['skills'] = skills
-        # self.__details['education'] = entities['education']
-        self.__details['education'] = edu
-        self.__details['experience'] = experience
+        
+        if "education" in entities:
+            self.__details['education'] = entities['education']
+        else:
+            self.__details['education'] = edu
+        
         try:
-            self.__details['competencies'] = utils.extract_competencies(self.__text_raw, entities['experience'])
-            self.__details['measurable_results'] = utils.extract_measurable_results(self.__text_raw, entities['experience'])
+                exp = round(
+                    utils.get_total_experience(entities['experience']) / 12,
+                    2
+                )
+                self.__details['total_experience'] = exp
         except KeyError:
-            self.__details['competencies'] = []
-            self.__details['measurable_results'] = []
+            self.__details['total_experience'] = 0
+        
+        
+
+
+
+        
+        self.__details['experience'] = experience
+        
         return
 
 def resume_result_wrapper(resume):
