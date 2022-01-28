@@ -1,5 +1,3 @@
-# Author: Omkar Pathak
-
 import io
 import os
 import re
@@ -20,7 +18,6 @@ from nltk.corpus import stopwords
 def extract_text_from_pdf(pdf_path):
     '''
     Helper function to extract the plain text from .pdf files
-
     :param pdf_path: path to PDF file to be extracted
     :return: iterator of string of extracted text
     '''
@@ -45,7 +42,6 @@ def extract_text_from_pdf(pdf_path):
 def extract_text_from_doc(doc_path):
     '''
     Helper function to extract plain text from .doc or .docx files
-
     :param doc_path: path to .doc or .docx file to be extracted
     :return: string of extracted text
     '''
@@ -56,7 +52,6 @@ def extract_text_from_doc(doc_path):
 def extract_text(file_path, extension):
     '''
     Wrapper function to detect the file extension and call text extraction function accordingly
-
     :param file_path: path of file of which text is to be extracted
     :param extension: extension of file `file_name`
     '''
@@ -71,7 +66,6 @@ def extract_text(file_path, extension):
 def extract_entity_sections(text):
     '''
     Helper function to extract all the raw text from sections of resume
-
     :param text: Raw text of resume
     :return: dictionary of entities
     '''
@@ -116,7 +110,6 @@ def extract_entity_sections(text):
 def extract_email(text):
     '''
     Helper function to extract email id from text
-
     :param text: plain text extracted from resume file
     '''
     email = re.findall("([^@|\s]+@[^@]+\.[^@|\s]+)", text)
@@ -129,7 +122,6 @@ def extract_email(text):
 def extract_name(nlp_text, matcher):
     '''
     Helper function to extract name from spacy nlp text
-
     :param nlp_text: object of `spacy.tokens.doc.Doc`
     :param matcher: object of `spacy.matcher.Matcher`
     :return: string of full name
@@ -147,7 +139,6 @@ def extract_name(nlp_text, matcher):
 def extract_mobile_number(text):
     '''
     Helper function to extract mobile number from text
-
     :param text: plain text extracted from resume file
     :return: string of extracted mobile numbers
     '''
@@ -163,7 +154,6 @@ def extract_mobile_number(text):
 def extract_skills(nlp_text, noun_chunks):
     '''
     Helper function to extract skills from spacy nlp text
-
     :param nlp_text: object of `spacy.tokens.doc.Doc`
     :param noun_chunks: noun chunks extracted from nlp text
     :return: list of skills extracted
@@ -192,7 +182,6 @@ def cleanup(token, lower = True):
 def extract_education(nlp_text):
     '''
     Helper function to extract education from spacy nlp text
-
     :param nlp_text: object of `spacy.tokens.doc.Doc`
     :return: tuple of education degree and year if year if found else only returns education degree
     '''
@@ -217,7 +206,6 @@ def extract_education(nlp_text):
 def extract_experience(resume_text):
     '''
     Helper function to extract experience from resume text
-
     :param resume_text: Plain resume text
     :return: list of experience
     '''
@@ -250,7 +238,6 @@ def extract_experience(resume_text):
 def extract_competencies(text, experience_list):
     '''
     Helper function to extract competencies from resume text
-
     :param resume_text: Plain resume text
     :return: dictionary of competencies
     '''
@@ -270,7 +257,6 @@ def extract_competencies(text, experience_list):
 def extract_measurable_results(text, experience_list):
     '''
     Helper function to extract measurable results from resume text
-
     :param resume_text: Plain resume text
     :return: dictionary of measurable results
     '''

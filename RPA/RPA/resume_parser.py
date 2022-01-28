@@ -1,5 +1,3 @@
-# Author: Omkar Pathak
-
 import os
 from . import utils
 import spacy
