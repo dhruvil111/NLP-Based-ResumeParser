@@ -1,6 +1,6 @@
 from django.shortcuts import render,HttpResponse
 from .models import myuploadfiles
-from pyresparser import ResumeParser
+from RPA.resume_parser import ResumeParser
 from django.conf import settings
 import os
 
