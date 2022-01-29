@@ -28,19 +28,33 @@ def extract_text_from_pdf(pdf_path):
             text += page.extract_text() 
     yield text
 
-def extract_text_from_doc(doc_path):
+def extract_text_from_docx(doc_path):
     
     temp = docx2txt.process(doc_path)
     text = [line.replace('\t', ' ') for line in temp.split('\n') if line]
     return ' '.join(text)
 
+def extract_text_from_doc(doc_path):
+    
+    try:
+        try:
+            import textract
+        except ImportError:
+            return ' '
+        text = textract.process(doc_path).decode('utf-8')
+        return text
+    except KeyError:
+        return ' '
+
 def extract_text(file_path, extension):
-   
+    
     text = ''
     if extension == '.pdf':
         for page in extract_text_from_pdf(file_path):
             text += ' ' + page
-    elif extension == '.docx' or extension == '.doc':
+    elif extension == '.docx':
+        text = extract_text_from_docx(file_path)
+    elif extension == '.doc':
         text = extract_text_from_doc(file_path)
     return text
 

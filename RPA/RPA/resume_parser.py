@@ -5,12 +5,12 @@ import pprint
 from spacy.matcher import Matcher
 import multiprocessing as mp
 
-class ResumeParser(object):
+class ResumeParser(object):   #class ResumeParser
     def __init__(self, resume):
         nlp = spacy.load('en_core_web_sm')
         #custom_nlp = spacy.load('RPA\custom_nlp_model')
         self.__matcher = Matcher(nlp.vocab)
-        self.__details = {
+        self.__details = {   #dictionary 
             'name'              : None,
             'email'             : None,
             'mobile_number'     : None,
