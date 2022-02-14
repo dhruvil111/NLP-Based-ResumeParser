@@ -19,6 +19,7 @@ from datetime import datetime
 from dateutil import relativedelta
 
 
+
 def extract_text_from_pdf(pdf_path):
     
     text = ''
@@ -274,3 +275,15 @@ def get_number_of_months_from_dates(date1, date2):
     except ValueError:
         return 0
     return months_of_experience
+
+def extract_entities_wih_custom_model(custom_nlp_text):
+
+    entities = {}
+    for ent in custom_nlp_text.ents:
+        if ent.label_ not in entities.keys():
+            entities[ent.label_] = ent.text
+        else:
+            entities[ent.label_].append(ent.text)
+    for key in entities.keys():
+        entities[key] = entities[key]
+    return entities
