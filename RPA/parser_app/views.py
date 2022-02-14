@@ -40,14 +40,21 @@ def send_files(request):
                 resume.skills         = None 
             
             if data.get('education') is not None:
-                resume.education      = data.get('education') #, '.join(data.get('education'))
+                resume.education      = ', '.join(data.get('education')) #, '.join(data.get('education'))
             else:
                 resume.education      = None
             
             if data.get('experience') is not None:
-                resume.experience     = data.get('experience')
+                resume.experience     = ', '.join(data.get('experience'))
             else:
                 resume.experience     = None
+            
+            if data.get('college_name') is not None:
+                resume.college_name       = ', '.join(data.get('college_name'))
+            else:
+                resume.college_name       = None
+
+            
             
             resume.save()
             resumes = myuploadfiles.objects.all()

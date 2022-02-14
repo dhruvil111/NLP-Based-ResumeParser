@@ -17,13 +17,16 @@ class ResumeParser(object):   #class ResumeParser
             'skills'            : None,
             'education'         : None,
             'experience'        : None,
-            #'college_name'      : None,
-            'measurable_results': None
+            'college_name'      : None,
+            'measurable_results': None,
+            'designation'       : None
+           
         }
         self.__resume      = resume
         self.__text_raw    = utils.extract_text(self.__resume, os.path.splitext(self.__resume)[1])
         self.__text        = ' '.join(self.__text_raw.split())
         self.__nlp         = nlp(self.__text)
+        self.__custom_nlp = custom_nlp(self.__text_raw)
         self.__noun_chunks = list(self.__nlp.noun_chunks)
         self.__get_basic_details()
 
@@ -41,16 +44,45 @@ class ResumeParser(object):   #class ResumeParser
             experience = entities['experience']
         else:
             experience = None
+
+        cust_ent = utils.extract_entities_wih_custom_model(self.__custom_nlp)
         entities   = utils.extract_entity_sections(self.__text_raw)
-        self.__details['name'] = name
+        
+        try:
+            self.__details['name'] = cust_ent['Name'][0]
+        except (IndexError, KeyError):
+            self.__details['name'] = name
+
         self.__details['email'] = email
         self.__details['mobile_number'] = mobile
-        self.__details['skills'] = skills
-        
-        if "education" in entities:
-            self.__details['education'] = entities['education']
+        if 'skills' in cust_ent:
+            self.__details['skills'] = cust_ent['Skills']
         else:
+            self.__details['skills'] = skills
+        
+        try:
+            self.__details['education'] =  cust_ent['Degree']
+        except:
             self.__details['education'] = edu
+
+        try:
+            self.__details['college_name'] = cust_ent['College Name']
+        except:
+            try:
+                self.__details['college_name'] = entities['College Name']
+            except:
+                if 'education' in entities:
+                    self.__details['college_name'] = entities['education']
+        
+        try:
+            self.__details['designation'] = cust_ent['Designation']
+        except KeyError:
+            pass
+        try:
+            self.__details['company_names'] = cust_ent['Companies worked at']
+        except KeyError:
+            pass
+            
         
         try:
                 exp = round(
@@ -65,8 +97,11 @@ class ResumeParser(object):   #class ResumeParser
 
 
 
-        
-        self.__details['experience'] = experience
+        try:
+            self.__details['experience'] = entities['experience']
+        except:
+            if 'experience' in entities:
+                self.__details['experience'] = entities['experience']
         
         return
 

@@ -2,6 +2,7 @@ import io
 import os
 import re
 import nltk
+from pkg_resources import yield_lines
 import spacy
 import pandas as pd
 import docx2txt
@@ -17,7 +18,9 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords 
 from datetime import datetime
 from dateutil import relativedelta
-
+import docx
+import pandas as pd
+from docx.api import Document
 
 
 def extract_text_from_pdf(pdf_path):
@@ -27,13 +30,56 @@ def extract_text_from_pdf(pdf_path):
         for i in range(len(pdf.pages)):
             page = pdf.pages[i]
             text += page.extract_text() 
-    yield text
+    return text
 
 def extract_text_from_docx(doc_path):
+    #doc = docx.Document(doc_path)
+    #l = len(doc.paragraphs)
+
+    #doc_text = ''
+
+    #for i in range(l):
+        #doc_text = doc_text + doc.paragraphs[i].text 
+  
+
+    #return doc_text
+
     
     temp = docx2txt.process(doc_path)
-    text = [line.replace('\t', ' ') for line in temp.split('\n') if line]
-    return ' '.join(text)
+    document = Document(doc_path)
+
+    table_text = ''
+
+
+
+
+    if document.tables:
+        for i in range(len(document.tables)):
+            table = document.tables[i]
+
+        data = []
+        keys = None
+
+        for i, row in enumerate(table.rows):
+            text = (cell.text for cell in row.cells)
+
+            if i == 0:
+                keys = tuple(text)
+                continue
+            row_data = dict(zip(keys, text))
+            data.append(row_data)
+      #print (data)
+
+        df = pd.DataFrame(data)
+
+
+        table_text += df.to_string( index = False)
+
+
+
+    #text = [line.replace('\t', ' ') for line in temp.split('\n') if line]
+    return  temp + table_text #' '.join(text)
+    
 
 def extract_text_from_doc(doc_path):
     
@@ -51,8 +97,7 @@ def extract_text(file_path, extension):
     
     text = ''
     if extension == '.pdf':
-        for page in extract_text_from_pdf(file_path):
-            text += ' ' + page
+        text = extract_text_from_pdf(file_path)
     elif extension == '.docx':
         text = extract_text_from_docx(file_path)
     elif extension == '.doc':
@@ -281,7 +326,7 @@ def extract_entities_wih_custom_model(custom_nlp_text):
     entities = {}
     for ent in custom_nlp_text.ents:
         if ent.label_ not in entities.keys():
-            entities[ent.label_] = ent.text
+            entities[ent.label_] = [ent.text]
         else:
             entities[ent.label_].append(ent.text)
     for key in entities.keys():
