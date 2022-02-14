@@ -8,7 +8,7 @@ import multiprocessing as mp
 class ResumeParser(object):   #class ResumeParser
     def __init__(self, resume):
         nlp = spacy.load('en_core_web_sm')
-        #custom_nlp = spacy.load('RPA\custom_nlp_model')
+        custom_nlp = spacy.load('RPA\custom_nlp_model')
         self.__matcher = Matcher(nlp.vocab)
         self.__details = {   #dictionary 
             'name'              : None,
