@@ -188,27 +188,6 @@ def cleanup(token, lower = True):
        token = token.lower()
     return token.strip()
 
-def extract_education(nlp_text):
-    
-    edu = {}
-    # Extract education degree
-    for index, text in enumerate(nlp_text):
-        for tex in text.split():
-            tex = re.sub(r'[?|$|.|!|,]', r'', tex)
-            if tex.upper() in cs.EDUCATION and tex not in cs.STOPWORDS:
-                if len(nlp_text) < index+1:
-                    edu[tex] = text + nlp_text[index + 1]
-
-    # Extract year
-    education = []
-    for key in edu.keys():
-        year = re.search(re.compile(cs.YEAR), edu[key])
-        if year:
-            education.append((key, ''.join(year.group(0))))
-        else:
-            education.append(key)
-    return education
-
 
 def extract_experience(resume_text):
     '''

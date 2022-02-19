@@ -17,9 +17,10 @@ class ResumeParser(object):   #class ResumeParser
             'skills'            : None,
             'education'         : None,
             'experience'        : None,
-            'college_name'      : None,
-            'measurable_results': None,
-            'designation'       : None
+            'designation'       : None,
+            'company_names'     : None,
+            'total_experience'  : None,
+            'college_name'      : None
            
         }
         self.__resume      = resume
@@ -39,7 +40,6 @@ class ResumeParser(object):   #class ResumeParser
         email      = utils.extract_email(self.__text)
         mobile     = utils.extract_mobile_number(self.__text)
         skills     = utils.extract_skills(self.__nlp, self.__noun_chunks)
-        edu        = utils.extract_education([sent.string.strip() for sent in self.__nlp.sents])
         if 'experience' in entities:
             experience = entities['experience']
         else:
@@ -63,8 +63,8 @@ class ResumeParser(object):   #class ResumeParser
         try:
             self.__details['education'] =  cust_ent['Degree']
         except:
-            self.__details['education'] = edu
-
+            pass
+ 
         try:
             self.__details['college_name'] = cust_ent['College Name']
         except:
@@ -98,10 +98,12 @@ class ResumeParser(object):   #class ResumeParser
 
 
         try:
-            self.__details['experience'] = entities['experience']
+            self.__details['experience'] = cust_ent['experience']
         except:
             if 'experience' in entities:
                 self.__details['experience'] = entities['experience']
+            else:
+                self.__details['experience'] = utils.extract_experience(self.__text_raw)
         
         return
 

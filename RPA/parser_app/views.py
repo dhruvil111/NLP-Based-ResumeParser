@@ -23,15 +23,12 @@ def send_files(request):
             resume.mobile_number      = data.get('mobile_number')
             resume.company_name      = data.get('company_names')
             #resume.college_name       = data.get('college_name')
-            l = []
-            '''if data.get('designation'):
-                for i in data.get('designation'):
-                    if '@' in i:
-                        continue
-                    else:
-                        l.append(i)'''
 
-            resume.designation        = data.get('designation')
+            if data.get('designation') is not None:
+                resume.designation     = ', '.join(data.get('designation'))
+            else:
+                resume.designation     = None
+
             resume.total_experience   = data.get('total_experience')  
 
             if data.get('skills') is not None:
@@ -39,8 +36,13 @@ def send_files(request):
             else:
                 resume.skills         = None 
             
+            if data.get('college_name') is not None:
+                tempo       = ', '.join(data.get('college_name'))
+            else:
+                tempo      =  ''
+            
             if data.get('education') is not None:
-                resume.education      = ', '.join(data.get('education')) #, '.join(data.get('education'))
+                resume.education      = tempo +',\n' + ',\n '.join(data.get('education')) 
             else:
                 resume.education      = None
             
@@ -49,10 +51,12 @@ def send_files(request):
             else:
                 resume.experience     = None
             
-            if data.get('college_name') is not None:
-                resume.college_name       = ', '.join(data.get('college_name'))
+          
+            
+            if data.get('company_names') is not None:
+                resume.company_name = ', '.join(data.get('company_names'))
             else:
-                resume.college_name       = None
+                resume.company_name = None
 
             
             
