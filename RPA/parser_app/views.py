@@ -3,6 +3,7 @@ from .models import myuploadfiles
 from RPA.resume_parser import ResumeParser
 from django.conf import settings
 import os
+from RPA import utils 
 
 def index(request):
     return render(request,"index.html")
@@ -21,45 +22,39 @@ def send_files(request):
             resume.name               = data.get('name')
             resume.email              = data.get('email')
             resume.mobile_number      = data.get('mobile_number')
-            resume.company_name      = data.get('company_names')
+            #resume.company_name      = data.get('company_names')
             #resume.college_name       = data.get('college_name')
 
-            if data.get('designation') is not None:
-                resume.designation     = ', '.join(data.get('designation'))
-            else:
-                resume.designation     = None
+            #if data.get('designation') is not None:
+             #   resume.designation     = data.get('designation')
+            #else:
+             #   resume.designation     = None
 
             resume.total_experience   = data.get('total_experience')  
 
-            if data.get('skills') is not None:
-                resume.skills         = ', '.join(data.get('skills'))
-            else:
-                resume.skills         = None 
-            
-            if data.get('college_name') is not None:
-                tempo       = ', '.join(data.get('college_name'))
-            else:
-                tempo      =  ''
-            
-            if data.get('education') is not None:
-                resume.education      = tempo +',\n' + ',\n '.join(data.get('education')) 
-            else:
-                resume.education      = None
-            
-            if data.get('experience') is not None:
-                resume.experience     = ', '.join(data.get('experience'))
-            else:
-                resume.experience     = None
-            
-          
-            
-            if data.get('company_names') is not None:
-                resume.company_name = ', '.join(data.get('company_names'))
-            else:
-                resume.company_name = None
+            resume.skills = data.get('skills')
 
+            resume.education      = ',\n '.join(data.get('education'))
+
+            #if data.get('skills') is not None:
+                #resume.skills         = ', '.join(data.get('skills'))
+            #else:
+                #resume.skills         = None 
             
+            #if data.get('education') is not None:
+                #resume.education      = ',\n '.join(data.get('education')) 
+            #else:
+                #resume.education      = None
             
+            #if data.get('experience') is not None:
+             #   resume.experience     = data.get('experience')
+            #else:
+             #   resume.experience     = None
+            
+            resume.experience = data.get('experience') 
+            resume.summary = data.get('summary')
+
+        
             resume.save()
             resumes = myuploadfiles.objects.all()
             context = {
@@ -69,5 +64,4 @@ def send_files(request):
 
            
 
-        return render(request,'UI.html',context)
-        #return HttpResponse("Files Uploaded Successfully")
+        return render(request,'UI2.html',context)

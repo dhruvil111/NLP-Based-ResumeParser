@@ -17,11 +17,9 @@ class ResumeParser(object):   #class ResumeParser
             'skills'            : None,
             'education'         : None,
             'experience'        : None,
-            'designation'       : None,
-            'company_names'     : None,
             'total_experience'  : None,
-            'college_name'      : None
-           
+            'summary'           : None
+    
         }
         self.__resume      = resume
         self.__text_raw    = utils.extract_text(self.__resume, os.path.splitext(self.__resume)[1])
@@ -35,75 +33,69 @@ class ResumeParser(object):   #class ResumeParser
         return self.__details
 
     def __get_basic_details(self):
-        entities = utils.extract_entity_sections_grad(self.__text_raw)
-        name       = utils.extract_name(self.__nlp, matcher=self.__matcher)
-        email      = utils.extract_email(self.__text)
+        #entities = utils.extract_entity_sections_grad(self.__text_raw)
+        os = utils.os_extraction(self.__text_raw)
+        #name       = utils.extract_name(self.__nlp, matcher=self.__matcher)
+        #email      = utils.extract_email(self.__text)
         mobile     = utils.extract_mobile_number(self.__text)
-        skills     = utils.extract_skills(self.__nlp, self.__noun_chunks)
-        if 'experience' in entities:
-            experience = entities['experience']
-        else:
-            experience = None
+        #skills     = utils.extract_skills(self.__nlp, self.__noun_chunks)
+
+        #if 'experience' in entities:
+         #   experience = entities['experience']
+        #else:
+         #   experience = None
 
         cust_ent = utils.extract_entities_wih_custom_model(self.__custom_nlp)
-        entities   = utils.extract_entity_sections(self.__text_raw)
+
+        #self.__details['name'] = os['names'][0]
+        
         
         try:
             self.__details['name'] = cust_ent['Name'][0]
         except (IndexError, KeyError):
             self.__details['name'] = name
 
-        self.__details['email'] = email
+        self.__details['email'] = os['emails'][0]['value'] #email
+        
         self.__details['mobile_number'] = mobile
-        if 'skills' in cust_ent:
-            self.__details['skills'] = cust_ent['Skills']
-        else:
-            self.__details['skills'] = skills
+
+        self.__details['skills'] = os['summary']['skills']
+
+        #if 'skills' in cust_ent:
+            #self.__details['skills'] = cust_ent['Skills']
+        #else:
+            #self.__details['skills'] = skills
         
+        self.__details['summary'] = os['summary']['executiveSummary']
+        
+
         try:
-            self.__details['education'] =  cust_ent['Degree']
+            self.__details['education'] = [str(i['degree'] + ', ' + i['org'] + '\n') for i in os['schools'] ]#entities['education']
         except:
             pass
- 
-        try:
-            self.__details['college_name'] = cust_ent['College Name']
-        except:
-            try:
-                self.__details['college_name'] = entities['College Name']
-            except:
-                if 'education' in entities:
-                    self.__details['college_name'] = entities['education']
+
+        self.__details['experience'] = utils.extract_experience(os['positions'])
         
-        try:
-            self.__details['designation'] = cust_ent['Designation']
-        except KeyError:
-            pass
-        try:
-            self.__details['company_names'] = cust_ent['Companies worked at']
-        except KeyError:
-            pass
-            
-        
-        try:
-                exp = round(
-                    utils.get_total_experience(entities['experience']) / 12,
-                    2
-                )
-                self.__details['total_experience'] = exp
-        except KeyError:
-            self.__details['total_experience'] = 0
+        #try:
+                #exp = round(
+                   # utils.get_total_experience(entities['experience']) / 12,
+#2
+                #)
+                #self.__details['total_experience'] = exp
+        #except KeyError:
+            #self.__details['total_experience'] = 0
         
         
 
 
 
-        try:
-            self.__details['experience'] = cust_ent['experience']
-        except:
-            if 'experience' in entities:
-                self.__details['experience'] = entities['experience']
-            else:
-                self.__details['experience'] = utils.extract_experience(self.__text_raw)
+        #try:
+         #   self.__details['experience'] = cust_ent['experience']
+        #except:
+            #if 'experience' in entities:
+             #   self.__details['experience'] = entities['experience']
+            #else:
+             #   self.__details['experience'] = utils.extract_experience(self.__text_raw)
         
         return
 

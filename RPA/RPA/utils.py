@@ -21,6 +21,10 @@ from dateutil import relativedelta
 import docx
 import pandas as pd
 from docx.api import Document
+import requests
+import json
+import random
+from lxml import html
 
 
 def extract_text_from_pdf(pdf_path):
@@ -46,39 +50,9 @@ def extract_text_from_docx(doc_path):
 
     
     temp = docx2txt.process(doc_path)
-    document = Document(doc_path)
-
-    table_text = ''
-
-
-
-
-    if document.tables:
-        for i in range(len(document.tables)):
-            table = document.tables[i]
-
-        data = []
-        keys = None
-
-        for i, row in enumerate(table.rows):
-            text = (cell.text for cell in row.cells)
-
-            if i == 0:
-                keys = tuple(text)
-                continue
-            row_data = dict(zip(keys, text))
-            data.append(row_data)
-      #print (data)
-
-        df = pd.DataFrame(data)
-
-
-        table_text += df.to_string( index = False)
-
-
 
     #text = [line.replace('\t', ' ') for line in temp.split('\n') if line]
-    return  temp + table_text #' '.join(text)
+    return  temp #+ table_text #' '.join(text)
     
 
 def extract_text_from_doc(doc_path):
@@ -104,29 +78,7 @@ def extract_text(file_path, extension):
         text = extract_text_from_doc(file_path)
     return text
 
-def extract_entity_sections(text):
-    
-    text_split = [i.strip() for i in text.split('\n')]
-    # sections_in_resume = [i for i in text_split if i.lower() in sections]
-    entities = {}
-    key = False
-    for phrase in text_split:
-        if len(phrase) == 1:
-            p_key = phrase
-        else:
-            p_key = set(phrase.lower().split()) & set(cs.RESUME_SECTIONS_GRAD)
-        try:
-            p_key = list(p_key)[0]
-        except IndexError:
-            pass
-        if p_key in cs.RESUME_SECTIONS_GRAD:
-            entities[p_key] = []
-            key = p_key
-        elif key and phrase.strip():
-            entities[key].append(phrase)
 
-   
-    return entities
 
 def extract_email(text):
 
@@ -189,76 +141,6 @@ def cleanup(token, lower = True):
     return token.strip()
 
 
-def extract_experience(resume_text):
-    '''
-    Helper function to extract experience from resume text
-    :param resume_text: Plain resume text
-    :return: list of experience
-    '''
-    wordnet_lemmatizer = WordNetLemmatizer()
-    stop_words = set(stopwords.words('english'))
-
-    # word tokenization
-    word_tokens = nltk.word_tokenize(resume_text)
-
-    # remove stop words and lemmatize
-    filtered_sentence = [
-            w for w in word_tokens if w not
-            in stop_words and wordnet_lemmatizer.lemmatize(w)
-            not in stop_words
-        ]
-    sent = nltk.pos_tag(filtered_sentence)
-
-    # parse regex
-    cp = nltk.RegexpParser('P: {<NNP>+}')
-    cs = cp.parse(sent)
-
-    # for i in cs.subtrees(filter=lambda x: x.label() == 'P'):
-    #     print(i)
-
-    test = []
-
-    for vp in list(
-        cs.subtrees(filter=lambda x: x.label() == 'P')
-    ):
-        test.append(" ".join([
-            i[0] for i in vp.leaves()
-            if len(vp.leaves()) >= 2])
-        )
-
-    # Search the word 'experience' in the chunk and
-    # then print out the text after it
-    x = [
-        x[x.lower().index('experience') + 10:]
-        for i, x in enumerate(test)
-        if x and 'experience' in x.lower()
-    ]
-    return x
-
-def extract_entity_sections_grad(text):
-   
-    text_split = [i.strip() for i in text.split('\n')]
-    # sections_in_resume = [i for i in text_split if i.lower() in sections]
-    entities = {}
-    key = False
-    for phrase in text_split:
-        if len(phrase) == 1:
-            p_key = phrase
-        else:
-            p_key = set(phrase.lower().split()) & set(cs.RESUME_SECTIONS_GRAD)
-        try:
-            p_key = list(p_key)[0]
-        except IndexError:
-            pass
-        if p_key in cs.RESUME_SECTIONS_GRAD:
-            entities[p_key] = []
-            key = p_key
-        elif key and phrase.strip():
-            entities[key].append(phrase)
-
-   
-    return entities
-
 def get_total_experience(experience_list):
     
     exp_ = []
@@ -311,3 +193,134 @@ def extract_entities_wih_custom_model(custom_nlp_text):
     for key in entities.keys():
         entities[key] = entities[key]
     return entities
+
+def os_extraction(text):
+    resume = text
+
+    postingSkip = random.randint(1,350)
+
+    postingInfo = requests.get(
+        f'https://api.lever.co/v0/postings/leverdemo?skip={postingSkip}&limit=1&mode=json'
+    )
+
+    postingURL = postingInfo.json()[0]['applyUrl']
+
+    posting = requests.get(postingURL)
+    root = html.fromstring(posting.text)
+    csrf = root.get_element_by_id("csrf-token").get('value')
+    postingID = root.get_element_by_id("posting-id").get('value')
+
+    headers = {
+        'Referer': 'https://jobs.lever.co/',
+        'Origin': 'https://jobs.lever.co/'
+    }
+
+    parseResponse = requests.post(
+        'https://jobs.lever.co/parseResume', 
+        files=dict(
+            resume=('resume.pdf', resume),
+            csrf=(None,csrf),
+            postingId=(None,postingID)
+            ),
+        headers=headers
+        )
+
+    response = json.dumps(parseResponse.json()) 
+
+    json_obj = json.loads(response)
+
+    return json_obj
+
+def extract_entity_sections_grad(text):
+    '''
+    Helper function to extract all the raw text from sections of
+    resume specifically for graduates and undergraduates
+    :param text: Raw text of resume
+    :return: dictionary of entities
+    '''
+    text_split = [i.strip() for i in text.split('\n')]
+    # sections_in_resume = [i for i in text_split if i.lower() in sections]
+    entities = {}
+    key = False
+    for phrase in text_split:
+        if len(phrase) == 1:
+            p_key = phrase
+        else:
+            p_key = set(phrase.lower().split()) & set(cs.RESUME_SECTIONS_GRAD)
+        try:
+            p_key = list(p_key)[0]
+        except IndexError:
+            pass
+        if p_key in cs.RESUME_SECTIONS_GRAD:
+            entities[p_key] = []
+            key = p_key
+        elif key and phrase.strip():
+            entities[key].append(phrase)
+
+    # entity_key = False
+    # for entity in entities.keys():
+    #     sub_entities = {}
+    #     for entry in entities[entity]:
+    #         if u'\u2022' not in entry:
+    #             sub_entities[entry] = []
+    #             entity_key = entry
+    #         elif entity_key:
+    #             sub_entities[entity_key].append(entry)
+    #     entities[entity] = sub_entities
+
+    # pprint.pprint(entities)
+
+    # make entities that are not found None
+    # for entity in cs.RESUME_SECTIONS:
+    #     if entity not in entities.keys():
+    #         entities[entity] = None
+    return entities
+
+def extract_experience(lst):
+
+    durations = []
+    company_names = []
+    designations = []
+    summary = []
+
+
+    for i in lst:
+        company_names.append(i['org'])
+        designations.append(i['title'])
+        summary.append(i['summary'])
+        if 'start' in i:
+            start = str(i['start']['month']) + '/' + str(i['start']['year'])
+        else:
+            start = '?'
+        if i['isCurrent'] == True:
+            end = 'present'
+        else:
+            if 'end' in i:
+                end = str(i['end']['month']) + '/' + str(i['end']['year'])
+            else:
+                end = '?'
+        
+        durations.append(start + ' - ' + end)
+    
+    exp = list(zip(company_names,designations,durations,summary))
+    
+    return to_json_string(exp)
+    
+
+def to_json_string(lst):
+
+    l = ["company_name","title","duration","summary"]
+    d = {}
+    for i in range(len(lst)): 
+        t = {}
+        for j in range(len(l)):
+            t[l[j]] = lst[i][j]
+        d[i] = t
+
+    return json.dumps(d)
+
+
+        
+
+
+

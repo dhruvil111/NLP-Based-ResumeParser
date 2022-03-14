@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resume Parser</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css"
+    /> -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      body {
+        font-family: "Fredoka";
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-900 text-gray-500 flex flex-col justify-center items-center"
+  >
+    <h1 class="text-6xl my-16">Resume Parser</h1>
+
+    <div class="max-w-5xl w-3/4 bg-gray-800 p-4 rounded">
+      <p class="text-lg font-semibold mb-2">Upload more resumes (docx or pdf):</p>
+      <form action="{% url 'fileapp:uploads' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input
+          type="file"
+          multiple
+          name="UploadFiles"
+          class="file:bg-gray-500 file:border-none file:rounded file:mr-2 file:py-1"
+        />
+      <p><button type="submit">Upload</button></p>
+      </form>
+    </div>
+    {% csrf_token %}
+
+    {% for resume in resumes %}
+
+    <div
+      class="max-w-5xl w-3/4 bg-gray-800 p-4 overflow-hidden shadow-md rounded mt-4"
+    >
+      <p class="text-lg font-semibold mb-2">{{resume.name}}'s Resume:</p>
+
+      <table class="w-full table-auto">
+        <thead class="bg-gray-900 rounded-t-lg">
+          
+          <tr>
+            <th class="py-2 px-6 text-left">Information</th>
+            <th class="py-2 px-6 text-left">Parsed</th>
+          </tr>
+        </thead>
+        <tbody class="space-y-1.5">
+          <tr class="border-b border-gray-700">
+            <td class="py-4 px-6 text-left">Name</td>
+            <td class="py-4 px-6 text-left">{{resume.name}}</td>
+          </tr>
+          <tr class="border-b border-gray-700">
+            <td class="py-4 px-6 text-left">Email</td>
+            <td class="py-4 px-6 text-left">{{resume.email}}</td>
+          </tr>
+          <tr class="border-b border-gray-700">
+            <td class="py-4 px-6 text-left">Phone</td>
+            <td class="py-4 px-6 text-left">{{resume.mobile_number}}</td>
+          </tr>
+          <tr class="border-b border-gray-700">
+            <td class="py-4 px-6 text-left">Education</td>
+            <td class="py-4 px-6 text-left">{{resume.education}}</td>
+          </tr>
+          <tr class="border-b border-gray-700">
+            <td class="py-4 px-6 text-left">Skills</td>
+            <td class="py-4 px-6 text-left">{{resume.skills}}</td>
+          </tr>
+          <tr>
+            <td class="py-4 px-6 text-left">Summary</td>
+            <td class="py-4 px-6 text-left">
+              {{ resume.summary }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    <p class="text-lg font-semibold mb-2">Work Experience</p>
+      <table class="w-full table-auto mt-2">
+        
+        <thead class="bg-gray-900 rounded-t-lg">
+          
+          <tr>
+            <th class="py-2 px-6 text-left">Company</th>
+            <th class="py-2 px-6 text-left">Position</th>
+            <th class="py-2 px-6 text-left">Date</th>
+            <th class="py-2 px-6 text-left">Summary</th>
+          </tr>
+        </thead>
+        
+        
+        <tbody class="space-y-1.5">
+          {% for e,v in resume.convert_to_json %}
+          <tr class="border-b border-gray-700">
+            <td class="py-4 px-6 text-left">{{v.company_name}}</td>
+            <td class="py-4 px-6 text-left">{{v.title}}</td>
+            <td class="py-4 px-6 text-left">{{v.duration}}</td>
+            <td class="py-4 px-6 text-left">{{v.summary}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
+    </div>
+    {% endfor %}
+  </body>
+</html>

@@ -5,14 +5,33 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      body {
+        font-family: "Fredoka";
+      }
+    </style>
+
 </head>
-<body>
-    <h1>Resume Parser</h1>
+<body class="bg-gray-900 text-gray-500 flex flex-col justify-center items-center">
+    <h1 class="text-6xl my-16">Resume Parser</h1>
     <form action="{% url 'fileapp:uploads' %}" method="post" enctype="multipart/form-data">
 
-        <p><input type="file" multiple name="UploadFiles"></p>
+        <div class="max-w-5xl w-3/4 bg-gray-800 p-4 rounded">
+        <p class="text-lg font-semibold mb-2">
+          <input type="file" multiple name="UploadFiles" class="file:bg-gray-500 file:border-none file:rounded file:mr.-2 file:py-1"></p>
         {% csrf_token %}
         <p><button type="submit">Upload</button></p>
+        </div>
 
     </form>
     
